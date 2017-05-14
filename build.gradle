@@ -1,0 +1,22 @@
+group 'pl.makasprzak'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+configurations.all {exclude module: "groovy-all"}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile group: 'org.raml', name: 'raml-parser-2', version: '1.0.8'
+    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+
+
+}

@@ -51,9 +51,9 @@ types:
             def checks = resolver.resolveEndpointChecks(raml)
         then:
             checks.size() == 3
-            expect checks, containsInAnyOrder(new EndpointChecksResolver.EndpointCheck(method: "GET", path: "http://localhost:8080/user", okStatus: 200),
-                   new EndpointChecksResolver.EndpointCheck(method: "POST", path: "http://localhost:8080/user", okStatus: 201),
-                   new EndpointChecksResolver.EndpointCheck(method: "GET", path: "http://localhost:8080/user/account", okStatus: 200))
+            expect checks, containsInAnyOrder(new EndpointCheck(method: "GET", path: "http://localhost:8080/user", okStatus: 200),
+                   new EndpointCheck(method: "POST", path: "http://localhost:8080/user", okStatus: 201),
+                   new EndpointCheck(method: "GET", path: "http://localhost:8080/user/account", okStatus: 200))
     }
 
     def "should report raml errors"() {
@@ -61,7 +61,7 @@ types:
         resolver.resolveEndpointChecks("")
 
         then:
-        EndpointChecksResolver.EndpointResolutionException ex = thrown()
+        EndpointChecksResolver.RamlParseException ex = thrown()
         ex.issues.head().contains("Empty document")
     }
 }

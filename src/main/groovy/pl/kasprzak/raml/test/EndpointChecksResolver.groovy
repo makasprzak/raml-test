@@ -33,7 +33,7 @@ class EndpointChecksResolver {
         else resources.collectMany { doExtract it }
     }
 
-    private void doExtract(Resource resource) {
+    private List<Resource> doExtract(Resource resource) {
         def extractedResources = extract(resource.resources())
         if (resource.methods().isEmpty()) extractedResources
         else extractedResources + resource

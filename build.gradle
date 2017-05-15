@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    compile localGroovy()
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.10'
     compile group: 'org.raml', name: 'raml-parser-2', version: '1.0.8'
     testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'

@@ -4,6 +4,7 @@ import groovy.transform.Canonical
 import groovy.transform.TupleConstructor
 import org.raml.v2.api.RamlModelBuilder
 import org.raml.v2.api.RamlModelResult
+import org.raml.v2.api.model.common.ValidationResult
 import org.raml.v2.api.model.v10.api.Api
 import org.raml.v2.api.model.v10.bodies.Response
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec
@@ -55,7 +56,10 @@ class EndpointChecksResolver {
         EndpointCheck check = new EndpointCheck(
                 method: method.method().toUpperCase(),
                 path: location + resource.resourcePath(),
-                okStatus: response.code().value().toInteger())
+                okStatus: response.code().value().toInteger(),
+                validationFunction: { String payload ->
+                    response.body().collect {it.validate(payload)}.every { it.isEmpty() }
+                     })
         Optional.of(method).map { it.body() }
                 .filter{ !it.isEmpty() }
                 .map{ it.first() }

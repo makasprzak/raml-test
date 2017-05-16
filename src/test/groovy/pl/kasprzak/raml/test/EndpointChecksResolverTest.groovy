@@ -52,10 +52,13 @@ types:
             def checks = resolver.resolveEndpointChecks(raml)
         then:
             checks.size() == 3
-            expect checks, containsInAnyOrder(
-                   new EndpointCheck(method: "GET", path: "http://localhost:8080/user", okStatus: 200),
-                   new EndpointCheck(method: "POST", path: "http://localhost:8080/user", okStatus: 201, body: '{ "name": "John Bean" }'),
-                   new EndpointCheck(method: "GET", path: "http://localhost:8080/user/account", okStatus: 200))
+            def indexed = checks.collectEntries { [new Tuple2<>(it.method, it.path), (it)] }
+            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).okStatus == 200
+            indexed.get(new Tuple2<>("POST", "http://localhost:8080/user")).okStatus == 201
+            indexed.get(new Tuple2<>("POST", "http://localhost:8080/user")).body == '{ "name": "John Bean" }'
+            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user/account")).okStatus == 200
+            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "name": "Romeo" }')
+            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "wrong": "Romeo" }') == false
     }
 
     def "should report raml errors"() {

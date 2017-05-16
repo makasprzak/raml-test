@@ -31,7 +31,8 @@ types:
   post:
     body:
       application/json:
-        example: { "name": "John Bean" }
+        type: object
+        example: { \"name\": \"John Bean\" }
     responses:
       201:
         headers:
@@ -51,8 +52,9 @@ types:
             def checks = resolver.resolveEndpointChecks(raml)
         then:
             checks.size() == 3
-            expect checks, containsInAnyOrder(new EndpointCheck(method: "GET", path: "http://localhost:8080/user", okStatus: 200),
-                   new EndpointCheck(method: "POST", path: "http://localhost:8080/user", okStatus: 201),
+            expect checks, containsInAnyOrder(
+                   new EndpointCheck(method: "GET", path: "http://localhost:8080/user", okStatus: 200),
+                   new EndpointCheck(method: "POST", path: "http://localhost:8080/user", okStatus: 201, body: '{ "name": "John Bean" }'),
                    new EndpointCheck(method: "GET", path: "http://localhost:8080/user/account", okStatus: 200))
     }
 

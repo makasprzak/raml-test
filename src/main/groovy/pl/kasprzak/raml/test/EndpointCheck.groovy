@@ -9,4 +9,5 @@ class EndpointCheck {
     String method
     String path
     Integer okStatus
+    def body = ""
 }

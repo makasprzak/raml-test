@@ -6,8 +6,10 @@ import org.raml.v2.api.RamlModelBuilder
 import org.raml.v2.api.RamlModelResult
 import org.raml.v2.api.model.v10.api.Api
 import org.raml.v2.api.model.v10.bodies.Response
+import org.raml.v2.api.model.v10.datamodel.ExampleSpec
 import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.resources.Resource
+import org.yaml.snakeyaml.error.Mark
 
 class EndpointChecksResolver {
     private final String location
@@ -50,10 +52,23 @@ class EndpointChecksResolver {
     }
 
     private EndpointCheck check(Method method, Resource resource, Response response) {
-        new EndpointCheck(
+        EndpointCheck check = new EndpointCheck(
                 method: method.method().toUpperCase(),
                 path: location + resource.resourcePath(),
                 okStatus: response.code().value().toInteger())
+        Optional.of(method).map { it.body() }
+                .filter{ !it.isEmpty() }
+                .map{ it.first() }
+                .map{ it.example() }
+                .map{ extractOriginalValue_dirtyHack(it) }
+                .ifPresent{check.body = it}
+        check
+    }
+
+    private String extractOriginalValue_dirtyHack(ExampleSpec it) {
+        def startMark = (Mark) it.properties.get("node").properties.get("yamlNode").startMark
+        def endMark = (Mark) it.properties.get("node").properties.get("yamlNode").endMark
+        endMark.buffer.substring(startMark.index, endMark.index)
     }
 
     @Canonical

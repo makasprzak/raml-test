@@ -57,21 +57,20 @@ class EndpointChecksResolver {
                 method: method.method().toUpperCase(),
                 path: location + resource.resourcePath(),
                 okStatus: response.code().value().toInteger(),
-                validationFunction: { String payload ->
-                    response.body().collectMany {it.validate(payload)}.collect{it.message}
-                     })
+                validateResponse: { String payload -> response.body()*.validate(payload).collectMany {it.message} })
         Optional.of(method).map { it.body() }
                 .filter{ !it.isEmpty() }
                 .map{ it.first() }
                 .map{ it.example() }
                 .map{ extractOriginalValue_dirtyHack(it) }
                 .ifPresent{check.body = it}
-        check
+        return check
     }
 
     private String extractOriginalValue_dirtyHack(ExampleSpec it) {
-        def startMark = (Mark) it.properties.get("node").properties.get("yamlNode").startMark
-        def endMark = (Mark) it.properties.get("node").properties.get("yamlNode").endMark
+        def node = it.node.yamlNode
+        def startMark = node.startMark
+        def endMark = node.endMark
         endMark.buffer.substring(startMark.index, endMark.index)
     }
 

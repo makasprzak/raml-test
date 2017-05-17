@@ -4,13 +4,11 @@ import groovy.transform.Canonical
 import groovy.transform.TupleConstructor
 import org.raml.v2.api.RamlModelBuilder
 import org.raml.v2.api.RamlModelResult
-import org.raml.v2.api.model.common.ValidationResult
 import org.raml.v2.api.model.v10.api.Api
 import org.raml.v2.api.model.v10.bodies.Response
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec
 import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.resources.Resource
-import org.yaml.snakeyaml.error.Mark
 
 class EndpointChecksResolver {
     private final String location

@@ -3,6 +3,9 @@ package pl.kasprzak.raml.test
 import spock.lang.Specification
 
 import static org.hamcrest.Matchers.containsInAnyOrder
+import static org.hamcrest.Matchers.empty
+import static org.hamcrest.Matchers.greaterThan
+import static org.hamcrest.Matchers.hasSize
 import static spock.util.matcher.HamcrestSupport.expect
 
 class EndpointChecksResolverTest extends Specification {
@@ -57,8 +60,8 @@ types:
             indexed.get(new Tuple2<>("POST", "http://localhost:8080/user")).okStatus == 201
             indexed.get(new Tuple2<>("POST", "http://localhost:8080/user")).body == '{ "name": "John Bean" }'
             indexed.get(new Tuple2<>("GET", "http://localhost:8080/user/account")).okStatus == 200
-            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "name": "Romeo" }')
-            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "wrong": "Romeo" }') == false
+            expect indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "name": "Romeo" }'), empty()
+            expect indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "wrong": "Romeo" }'), hasSize( greaterThan(0) )
     }
 
     def "should report raml errors"() {

@@ -58,7 +58,7 @@ class EndpointChecksResolver {
                 path: location + resource.resourcePath(),
                 okStatus: response.code().value().toInteger(),
                 validationFunction: { String payload ->
-                    response.body().collect {it.validate(payload)}.every { it.isEmpty() }
+                    response.body().collectMany {it.validate(payload)}.collect{it.message}
                      })
         Optional.of(method).map { it.body() }
                 .filter{ !it.isEmpty() }

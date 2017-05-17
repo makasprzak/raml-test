@@ -10,9 +10,9 @@ class EndpointCheck {
     String path
     Integer okStatus
     def body = ""
-    def validationFunction = { it -> true }
+    def validationFunction = { it -> Collections.emptyList() }
 
-    boolean validateResponse(String response) {
+    List<String> validateResponse(String response) {
         validationFunction(response)
     }
 }

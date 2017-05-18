@@ -11,7 +11,7 @@ class CheckExecutor {
 
     def execute(EndpointCheck check) {
         def responseBody = (given().config().port(port).
-                when() as MethodExecutor).executeMethod(check.method, check.path)
+                when().body(check.body) as MethodExecutor).executeMethod(check.method, check.path)
                 .then().statusCode(check.okStatus)
                 .extract().response().body().prettyPrint()
         check.validateResponse(responseBody)

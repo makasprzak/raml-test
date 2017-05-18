@@ -52,6 +52,41 @@ class CheckExecutorTest extends Specification {
         expect invocations, hasSize(1)
     }
 
+    def "should fail for wrong status"() {
+        given:
+
+        server
+            .when(
+                HttpRequest.request()
+                    .withMethod("GET")
+                    .withPath("/user")
+        )
+        .respond(
+            HttpResponse.response()
+                .withStatusCode(404)
+        )
+
+        def check = new EndpointCheck(method: "GET", path: "/user", okStatus: 200, validateResponse: {Collections.emptyList()})
+
+        when:
+        executor.execute(check)
+
+        then:
+        thrown AssertionError
+    }
+
+    def "should fail for wrong method"() {
+        given:
+
+        def check = new EndpointCheck(method: "BAD", path: "/user", okStatus: 200, validateResponse: {Collections.emptyList()})
+
+        when:
+        executor.execute(check)
+
+        then:
+        thrown RuntimeException
+    }
+
     def "should check post request"() {
         given:
 
@@ -60,11 +95,11 @@ class CheckExecutorTest extends Specification {
                 HttpRequest.request()
                     .withMethod("POST")
                     .withPath("/user")
+                    .withBody("""{"name":"John Bean"}""")
         )
         .respond(
             HttpResponse.response()
                 .withStatusCode(201)
-                .withBody("""{"name":"John Bean"}""")
                 .withHeader("Content-Type", "application/json")
         )
         def invocations = new HashSet<>()
@@ -72,7 +107,12 @@ class CheckExecutorTest extends Specification {
             invocations.add(body)
             return Collections.emptyList()
         }
-        def check = new EndpointCheck(method: "POST", path: "/user", okStatus: 201, validateResponse: validationFunction)
+        def check = new EndpointCheck(
+                method: "POST",
+                path: "/user",
+                body: """{"name":"John Bean"}""",
+                okStatus: 201,
+                validateResponse: validationFunction)
 
         when:
         executor.execute(check)

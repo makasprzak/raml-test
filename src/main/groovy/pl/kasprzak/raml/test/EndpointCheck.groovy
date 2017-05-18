@@ -10,5 +10,5 @@ class EndpointCheck {
     String path
     Integer okStatus
     def body = ""
-    Closure<List<String>> validateResponse = { it -> Collections.emptyList() }
+    Closure<List<String>> validateResponse
 }

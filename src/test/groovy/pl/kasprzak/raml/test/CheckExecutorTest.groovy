@@ -23,7 +23,7 @@ class CheckExecutorTest extends Specification {
         server.stop()
     }
 
-    def "should check request"() {
+    def "should check get request"() {
         given:
 
         server
@@ -44,6 +44,35 @@ class CheckExecutorTest extends Specification {
             return Collections.emptyList()
         }
         def check = new EndpointCheck(method: "GET", path: "/user", okStatus: 200, validateResponse: validationFunction)
+
+        when:
+        executor.execute(check)
+
+        then:
+        expect invocations, hasSize(1)
+    }
+
+    def "should check post request"() {
+        given:
+
+        server
+            .when(
+                HttpRequest.request()
+                    .withMethod("POST")
+                    .withPath("/user")
+        )
+        .respond(
+            HttpResponse.response()
+                .withStatusCode(201)
+                .withBody("""{"name":"John Bean"}""")
+                .withHeader("Content-Type", "application/json")
+        )
+        def invocations = new HashSet<>()
+        Closure<List<String>> validationFunction = { String body ->
+            invocations.add(body)
+            return Collections.emptyList()
+        }
+        def check = new EndpointCheck(method: "POST", path: "/user", okStatus: 201, validateResponse: validationFunction)
 
         when:
         executor.execute(check)

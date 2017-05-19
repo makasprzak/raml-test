@@ -1,5 +1,6 @@
 package pl.kasprzak.raml.test
 
+import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.response.ResponseOptions
 import com.jayway.restassured.specification.RequestSpecification
 
@@ -14,10 +15,14 @@ class CheckExecutor {
 
     def execute(EndpointCheck check) {
         def response = given().config().port(port).
-                when().body(check.body).withTraits(MethodExecutor).executeMethod(check.method, check.path)
-                .then().statusCode(check.okStatus)
-                .extract().response().withTraits(HeaderAssert, ResponseValidator)
-        response.assertHeaders check.headers
+                when()
+                    .body(check.body)
+                    .contentType("application/json")
+                    .withTraits(MethodExecutor).executeMethod(check.method, check.path)
+                .then()
+                    .statusCode(check.okStatus)
+                    .extract().response().withTraits(HeaderAssert, ResponseValidator)
+        response.assertHeaders check.responseHeaders
         response.validateResponse check.validateResponse
     }
 

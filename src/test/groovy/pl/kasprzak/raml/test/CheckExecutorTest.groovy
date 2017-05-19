@@ -98,7 +98,7 @@ class CheckExecutorTest extends Specification {
         thrown AssertionError
     }
 
-    def "should fail for wrong header"() {
+    def "should fail for wrong response header"() {
         given:
 
         server
@@ -114,7 +114,7 @@ class CheckExecutorTest extends Specification {
                 .withHeader("Not-A-Location", "/user")
         )
 
-        def check = new EndpointCheck(method: "POST", path: "/user", body: """{"name":"John Bean"}""", okStatus: 201, headers: ['Location'], validateResponse: {Collections.emptyList()})
+        def check = new EndpointCheck(method: "POST", path: "/user", body: """{"name":"John Bean"}""", okStatus: 201, responseHeaders: ['Location'], validateResponse: {Collections.emptyList()})
 
         when:
         executor.execute(check)

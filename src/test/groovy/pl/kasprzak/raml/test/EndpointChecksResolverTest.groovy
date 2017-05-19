@@ -38,7 +38,7 @@ types:
         example: { \"name\": \"John Bean\" }
     responses:
       201:
-        headers:
+        responseHeaders:
           Location:
             example: http://localhost:8080/user
   /account:

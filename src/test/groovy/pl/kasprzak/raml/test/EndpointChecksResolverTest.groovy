@@ -2,10 +2,7 @@ package pl.kasprzak.raml.test
 
 import spock.lang.Specification
 
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.empty
-import static org.hamcrest.Matchers.greaterThan
-import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.*
 import static spock.util.matcher.HamcrestSupport.expect
 
 class EndpointChecksResolverTest extends Specification {
@@ -55,13 +52,14 @@ types:
             def checks = resolver.resolveEndpointChecks(raml)
         then:
             checks.size() == 3
-            def indexed = checks.collectEntries { [new Tuple2<>(it.method, it.path), (it)] }
-            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).okStatus == 200
-            indexed.get(new Tuple2<>("POST", "http://localhost:8080/user")).okStatus == 201
-            indexed.get(new Tuple2<>("POST", "http://localhost:8080/user")).body == '{ "name": "John Bean" }'
-            indexed.get(new Tuple2<>("GET", "http://localhost:8080/user/account")).okStatus == 200
-            expect indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "name": "Romeo" }'), empty()
-            expect indexed.get(new Tuple2<>("GET", "http://localhost:8080/user")).validateResponse('{ "wrong": "Romeo" }'), hasSize( greaterThan(0) )
+            def indexed = checks.collectEntries { [[it.method, it.path], (it)] }
+            indexed.get(["GET", "http://localhost:8080/user"]).okStatus == 200
+            indexed.get(["POST", "http://localhost:8080/user"]).okStatus == 201
+            indexed.get(["POST", "http://localhost:8080/user"]).body == '{ "name": "John Bean" }'
+            indexed.get(["GET", "http://localhost:8080/user/account"]).okStatus == 200
+            indexed.get(["POST", "http://localhost:8080/user"]).responseHeaders == ['Location']
+            expect indexed.get(["GET", "http://localhost:8080/user"]).validateResponse('{ "name": "Romeo" }'), empty()
+            expect indexed.get(["GET", "http://localhost:8080/user"]).validateResponse('{ "wrong": "Romeo" }'), hasSize( greaterThan(0) )
     }
 
     def "should report raml errors"() {

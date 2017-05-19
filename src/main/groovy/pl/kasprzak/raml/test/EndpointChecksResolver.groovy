@@ -55,14 +55,23 @@ class EndpointChecksResolver {
                 method: method.method().toUpperCase(),
                 path: location + resource.resourcePath(),
                 okStatus: response.code().value().toInteger(),
-                validateResponse: { String payload -> response.body()*.validate(payload).collectMany {it.message} })
-        Optional.of(method).map { it.body() }
-                .filter{ !it.isEmpty() }
-                .map{ it.first() }
-                .map{ it.example() }
-                .map{ extractOriginalValue_dirtyHack(it) }
-                .ifPresent{check.body = it}
+                validateResponse: responseBodyValidationClosure(response),
+                responseHeaders: response.headers()*.name().collect()
+        )
+        extractBody(method).ifPresent{check.body = it}
         return check
+    }
+
+    private Closure<List> responseBodyValidationClosure(response) {
+        { String payload -> response.body()*.validate(payload).collectMany { it.message } }
+    }
+
+    private Optional<String> extractBody(Method method) {
+        Optional.of(method).map { it.body() }
+                .filter { !it.isEmpty() }
+                .map { it.first() }
+                .map { it.example() }
+                .map { extractOriginalValue_dirtyHack(it) }
     }
 
     private String extractOriginalValue_dirtyHack(ExampleSpec it) {

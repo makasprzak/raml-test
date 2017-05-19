@@ -1,5 +1,7 @@
 package pl.kasprzak.raml.test
 
+import org.raml.v2.api.RamlModelBuilder
+import org.raml.v2.api.model.v10.api.Api
 import spock.lang.Specification
 
 import static org.hamcrest.Matchers.*
@@ -7,49 +9,12 @@ import static spock.util.matcher.HamcrestSupport.expect
 
 class EndpointChecksResolverTest extends Specification {
     def location = 'http://localhost:8080'
-    private final EndpointChecksResolver resolver = new EndpointChecksResolver(location)
+    private final EndpointChecksResolver resolver = new EndpointChecksResolver(location: location)
 
     def "should resolve all endpoint checks"() {
-        def raml = """#%RAML 1.0
-title: test-api
-types:
-  User:
-    type: object
-    properties:
-      name: string
-  Account:
-    type: object
-    properties:
-      id: number    
-/user:
-  get:
-    responses:
-      200:
-        body:
-          application/json:
-            type: User
-  post:
-    body:
-      application/json:
-        type: object
-        example: { \"name\": \"John Bean\" }
-    responses:
-      201:
-        headers:
-          Location:
-            example: http://localhost:8080/user
-  /account:
-    get:
-      responses:
-        200:
-          body:
-            application/json:
-              type: Account
-                            
-                 
-"""
+        String raml = getClass().getResource('/api.raml').text
         when:
-            def checks = resolver.resolveEndpointChecks(raml)
+            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
         then:
             checks.size() == 3
             def indexed = checks.collectEntries { [[it.method, it.path], (it)] }
@@ -62,12 +27,8 @@ types:
             expect indexed.get(["GET", "http://localhost:8080/user"]).validateResponse('{ "wrong": "Romeo" }'), hasSize( greaterThan(0) )
     }
 
-    def "should report raml errors"() {
-        when:
-        resolver.resolveEndpointChecks("")
-
-        then:
-        EndpointChecksResolver.RamlParseException ex = thrown()
-        ex.issues.head().contains("Empty document")
+    private Api buildApi(String raml) {
+        new RamlModelBuilder().buildApi(raml, location).apiV10
     }
+
 }

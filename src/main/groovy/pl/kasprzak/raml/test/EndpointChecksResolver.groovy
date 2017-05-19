@@ -1,9 +1,5 @@
 package pl.kasprzak.raml.test
 
-import groovy.transform.Canonical
-import groovy.transform.TupleConstructor
-import org.raml.v2.api.RamlModelBuilder
-import org.raml.v2.api.RamlModelResult
 import org.raml.v2.api.model.v10.api.Api
 import org.raml.v2.api.model.v10.bodies.Response
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec
@@ -11,16 +7,12 @@ import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.resources.Resource
 
 class EndpointChecksResolver {
-    private final String location
-    EndpointChecksResolver(String location) {
-        this.location = location
-    }
+    def location
 
-    List<EndpointCheck> resolveEndpointChecks(raml) {
-        Api apiV10 = buildApi(raml)
+    List<EndpointCheck> resolveEndpointChecksWithApi(Api apiV10) {
         List<Method> methods = extract(apiV10.resources()).collectMany { it.methods() }
         List<Tuple2<Method, Response>> responses = methods.collectMany {
-            it.responses().collect{ response ->
+            it.responses().collect { response ->
                 new Tuple2<>(it, response)
             }
         }
@@ -40,16 +32,6 @@ class EndpointChecksResolver {
         else extractedResources + resource
     }
 
-    private Api buildApi(raml) {
-        def api = new RamlModelBuilder().buildApi(raml, location)
-        if (api.hasErrors()) throw new RamlParseException(getErrors(api))
-        api.apiV10
-    }
-
-    private List<String> getErrors(RamlModelResult api) {
-        api.getValidationResults()*.getMessage().collect()
-    }
-
     private EndpointCheck check(Method method, Resource resource, Response response) {
         EndpointCheck check = new EndpointCheck(
                 method: method.method().toUpperCase(),
@@ -62,11 +44,11 @@ class EndpointChecksResolver {
         return check
     }
 
-    private Closure<List> responseBodyValidationClosure(response) {
+    private static Closure<List> responseBodyValidationClosure(response) {
         { String payload -> response.body()*.validate(payload).collectMany { it.message } }
     }
 
-    private Optional<String> extractBody(Method method) {
+    private static Optional<String> extractBody(Method method) {
         Optional.of(method).map { it.body() }
                 .filter { !it.isEmpty() }
                 .map { it.first() }
@@ -74,21 +56,11 @@ class EndpointChecksResolver {
                 .map { extractOriginalValue_dirtyHack(it) }
     }
 
-    private String extractOriginalValue_dirtyHack(ExampleSpec it) {
+    private static String extractOriginalValue_dirtyHack(ExampleSpec it) {
         def node = it.node.yamlNode
         def startMark = node.startMark
         def endMark = node.endMark
         endMark.buffer.substring(startMark.index, endMark.index)
     }
 
-    @Canonical
-    @TupleConstructor
-    static class RamlParseException extends RuntimeException {
-        List<String> issues
-
-        @Override
-        String getMessage() {
-            return "following issues found while processing RAML file:\n" + issues.join('\n') + ('\n')
-        }
-    }
 }

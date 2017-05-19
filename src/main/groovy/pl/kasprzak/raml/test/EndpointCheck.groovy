@@ -10,5 +10,6 @@ class EndpointCheck {
     String path
     Integer okStatus
     def body = ""
+    List<String> headers
     Closure<List<String>> validateResponse
 }

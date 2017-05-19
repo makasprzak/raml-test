@@ -51,6 +51,30 @@ class CheckExecutorTest extends Specification {
         expect invocations, hasSize(1)
     }
 
+    def "should throw AssertionError to communicate bad response body"() {
+        given:
+
+        server
+            .when(
+                HttpRequest.request()
+                    .withMethod("GET")
+                    .withPath("/user")
+        )
+        .respond(
+            HttpResponse.response()
+                .withStatusCode(200)
+                .withBody("""{"bad":"John Bean"}""")
+                .withHeader("Content-Type", "application/json")
+        )
+        def check = new EndpointCheck(method: "GET", path: "/user", okStatus: 200, validateResponse: { String body -> Collections.singletonList("bad body") })
+
+        when:
+        executor.execute(check)
+
+        then:
+        thrown AssertionError
+    }
+
     def "should fail for wrong status"() {
         given:
 

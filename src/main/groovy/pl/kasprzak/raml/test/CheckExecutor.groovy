@@ -31,7 +31,7 @@ class CheckExecutor {
 
     trait ResponseValidator implements ResponseOptions {
         def validateResponse(Closure<List<String>> validationFunction) {
-            validationFunction(body().prettyPrint())
+            assert validationFunction(body().prettyPrint()).size() == 0
         }
     }
 

@@ -146,6 +146,31 @@ class CheckExecutorTest extends Specification {
         then:
         noExceptionThrown()
     }
+    def "should check delete request"() {
+        given:
+
+        server
+            .when(
+                HttpRequest.request()
+                    .withMethod("DELETE")
+                    .withPath("/user")
+        )
+        .respond(
+            HttpResponse.response()
+                .withStatusCode(200)
+        )
+        def check = new EndpointCheck(
+                method: "DELETE",
+                path: "/user",
+                okStatus: 200,
+                validateResponse: {Collections.emptyList()})
+
+        when:
+        executor.execute(check)
+
+        then:
+        noExceptionThrown()
+    }
 
 
 }

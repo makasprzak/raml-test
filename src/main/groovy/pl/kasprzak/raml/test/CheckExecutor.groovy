@@ -26,7 +26,8 @@ class CheckExecutor {
                 case "GET": return get(path)
                 case "POST": return post(path)
                 case "PUT": return  put(path)
-                default: throw new IllegalArgumentException("Illegal http method! ${method}")
+                case "DELETE": return delete(path)
+                default: throw new IllegalArgumentException("Unsupported http method! ${method}")
             }
         }
     }

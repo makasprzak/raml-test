@@ -1,5 +1,7 @@
 package pl.kasprzak.raml.test
 
+import com.jayway.restassured.specification.RequestSpecification
+
 import static com.jayway.restassured.RestAssured.given
 
 class CheckExecutor {
@@ -18,12 +20,13 @@ class CheckExecutor {
         responseBody
     }
 
-    trait MethodExecutor {
+    trait MethodExecutor implements RequestSpecification {
         def executeMethod(String method, String path) {
             switch (method) {
                 case "GET": return get(path)
                 case "POST": return post(path)
-                default: throw new RuntimeException("Illegal http method! ${method}")
+                case "PUT": return  put(path)
+                default: throw new IllegalArgumentException("Illegal http method! ${method}")
             }
         }
     }

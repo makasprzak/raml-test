@@ -6,7 +6,6 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.socket.PortFactory
 import spock.lang.Specification
 
-import static com.jayway.restassured.RestAssured.given
 import static org.hamcrest.Matchers.hasSize
 import static spock.util.matcher.HamcrestSupport.expect
 
@@ -84,7 +83,7 @@ class CheckExecutorTest extends Specification {
         executor.execute(check)
 
         then:
-        thrown RuntimeException
+        thrown IllegalArgumentException
     }
 
     def "should check post request"() {
@@ -119,6 +118,33 @@ class CheckExecutorTest extends Specification {
 
         then:
         expect invocations, hasSize(1)
+    }
+    def "should check put request"() {
+        given:
+
+        server
+            .when(
+                HttpRequest.request()
+                    .withMethod("PUT")
+                    .withPath("/user")
+        )
+        .respond(
+            HttpResponse.response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", "application/json")
+        )
+        def check = new EndpointCheck(
+                method: "PUT",
+                path: "/user",
+                body: """{"name":"John Bean"}""",
+                okStatus: 200,
+                validateResponse: {Collections.emptyList()})
+
+        when:
+        executor.execute(check)
+
+        then:
+        noExceptionThrown()
     }
 
 

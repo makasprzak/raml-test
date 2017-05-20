@@ -35,13 +35,20 @@ class EndpointChecksResolver {
     private EndpointCheck check(Method method, Resource resource, Response response) {
         EndpointCheck check = new EndpointCheck(
                 method: method.method().toUpperCase(),
-                path: pathSanitizer.sanitizePath(resource.resourcePath()),
+                path: buildPath(resource),
                 okStatus: response.code().value().toInteger(),
                 validateResponse: responseBodyValidationClosure(response),
                 responseHeaders: response.headers()*.name().collect()
         )
         extractBody(method).ifPresent{check.body = it}
         return check
+    }
+
+    private String buildPath(Resource resource) {
+        def parameterTypes = resource.uriParameters().collectEntries {
+            [(it.name()): it.type()]
+        }
+        pathSanitizer.sanitizePath(resource.resourcePath(), parameterTypes)
     }
 
 

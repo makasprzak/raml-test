@@ -10,14 +10,17 @@ import pl.kasprzak.raml.test.RamlParser
 
 class RamlApiCheckTask extends DefaultTask {
 
+    private static final int NOT_TO_GET_TO_FUZZY = 10
     String ramlPath
     int port
 
     @TaskAction
     def checkApi() {
+        def random = new Random()
         def location = "http://localhost:${port}"
         def api = new RamlParser(location: location).buildApi(readRaml(ramlPath))
-        def checks = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location)).resolveEndpointChecksWithApi(api)
+        def randomizer = {random.nextInt(NOT_TO_GET_TO_FUZZY)}
+        def checks = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location, randomizer: randomizer)).resolveEndpointChecksWithApi(api)
         def executor = new CheckExecutor(port: port)
         checks.forEach { executor.execute(it) }
     }

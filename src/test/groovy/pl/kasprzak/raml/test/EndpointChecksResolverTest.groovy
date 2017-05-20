@@ -8,8 +8,9 @@ import static org.hamcrest.Matchers.*
 import static spock.util.matcher.HamcrestSupport.expect
 
 class EndpointChecksResolverTest extends Specification {
+    def randomizer = { 123 }
     def location = 'http://localhost:8080'
-    private final EndpointChecksResolver resolver = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location))
+    private final EndpointChecksResolver resolver = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location, randomizer: randomizer))
 
     def "should resolve all endpoint checks"() {
         given:
@@ -28,14 +29,24 @@ class EndpointChecksResolverTest extends Specification {
             expect indexed.get(["GET", "http://localhost:8080/user"]).validateResponse('{ "wrong": "Romeo" }'), hasSize( greaterThan(0) )
     }
 
-    def "should replace template uri parameters"() {
+    def "should replace template uri parameter of unspecified type with dummy string value by default"() {
         given:
-            String raml = getClass().getResource('/api_1.raml').text
+            String raml = getClass().getResource('/default_uri_parameter_example.raml').text
         when:
             def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
         then:
             checks.size() == 1
             expect checks.first().path, endsWith('/users/some-id')
+    }
+
+    def "should replace integer uri parameters with random value by default"() {
+        given:
+            String raml = getClass().getResource('/integer_uri_parameter_example.raml').text
+        when:
+            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+        then:
+            checks.size() == 1
+            expect checks.first().path, endsWith('/users/123')
     }
 
     private Api buildApi(String raml) {

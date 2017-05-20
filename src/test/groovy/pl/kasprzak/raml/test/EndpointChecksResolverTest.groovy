@@ -9,10 +9,11 @@ import static spock.util.matcher.HamcrestSupport.expect
 
 class EndpointChecksResolverTest extends Specification {
     def location = 'http://localhost:8080'
-    private final EndpointChecksResolver resolver = new EndpointChecksResolver(location: location)
+    private final EndpointChecksResolver resolver = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location))
 
     def "should resolve all endpoint checks"() {
-        String raml = getClass().getResource('/api.raml').text
+        given:
+            String raml = getClass().getResource('/api.raml').text
         when:
             def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
         then:
@@ -25,6 +26,16 @@ class EndpointChecksResolverTest extends Specification {
             indexed.get(["POST", "http://localhost:8080/user"]).responseHeaders == ['Location']
             expect indexed.get(["GET", "http://localhost:8080/user"]).validateResponse('{ "name": "Romeo" }'), empty()
             expect indexed.get(["GET", "http://localhost:8080/user"]).validateResponse('{ "wrong": "Romeo" }'), hasSize( greaterThan(0) )
+    }
+
+    def "should replace template uri parameters"() {
+        given:
+            String raml = getClass().getResource('/api_1.raml').text
+        when:
+            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+        then:
+            checks.size() == 1
+            expect checks.first().path, endsWith('/users/some-id')
     }
 
     private Api buildApi(String raml) {

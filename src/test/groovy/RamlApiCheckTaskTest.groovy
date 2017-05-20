@@ -62,7 +62,7 @@ class RamlApiCheckTaskTest extends Specification implements MockServerTestBase {
         thrown AssertionError
     }
 
-    def createTask() {
+    private RamlApiCheckTask createTask() {
         Project project = ProjectBuilder.builder().build()
         def task = project.task('checkApi', type: RamlApiCheckTask) {
             ramlPath = '/api.raml'

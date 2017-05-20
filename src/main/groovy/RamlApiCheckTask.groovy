@@ -5,6 +5,7 @@ import org.raml.v2.api.model.v10.api.Api
 import pl.kasprzak.raml.test.CheckExecutor
 import pl.kasprzak.raml.test.EndpointCheck
 import pl.kasprzak.raml.test.EndpointChecksResolver
+import pl.kasprzak.raml.test.PathSanitizer
 import pl.kasprzak.raml.test.RamlParser
 
 class RamlApiCheckTask extends DefaultTask {
@@ -16,7 +17,7 @@ class RamlApiCheckTask extends DefaultTask {
     def checkApi() {
         def location = "http://localhost:${port}"
         def api = new RamlParser(location: location).buildApi(readRaml(ramlPath))
-        def checks = new EndpointChecksResolver(location: location).resolveEndpointChecksWithApi(api)
+        def checks = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location)).resolveEndpointChecksWithApi(api)
         def executor = new CheckExecutor(port: port)
         checks.forEach { executor.execute(it) }
     }

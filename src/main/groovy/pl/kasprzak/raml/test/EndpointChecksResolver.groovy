@@ -7,7 +7,7 @@ import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.resources.Resource
 
 class EndpointChecksResolver {
-    def location
+    PathSanitizer pathSanitizer
 
     List<EndpointCheck> resolveEndpointChecksWithApi(Api apiV10) {
         List<Method> methods = extract(apiV10.resources()).collectMany { it.methods() }
@@ -35,7 +35,7 @@ class EndpointChecksResolver {
     private EndpointCheck check(Method method, Resource resource, Response response) {
         EndpointCheck check = new EndpointCheck(
                 method: method.method().toUpperCase(),
-                path: location + resource.resourcePath(),
+                path: pathSanitizer.sanitizePath(resource.resourcePath()),
                 okStatus: response.code().value().toInteger(),
                 validateResponse: responseBodyValidationClosure(response),
                 responseHeaders: response.headers()*.name().collect()
@@ -43,6 +43,7 @@ class EndpointChecksResolver {
         extractBody(method).ifPresent{check.body = it}
         return check
     }
+
 
     private static Closure<List> responseBodyValidationClosure(response) {
         { String payload -> response.body()*.validate(payload).collectMany { it.message } }

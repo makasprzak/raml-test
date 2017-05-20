@@ -12,6 +12,6 @@ class PathSanitizerTest extends Specification {
 
     def "should replace template respecting specified type"() {
         expect:
-        sanitizer.sanitizePath('/users/{id}', [id: [type: 'integer', example: Optional.empty()]]) == '../users/321'
+        sanitizer.sanitizePath('/users/{id}', [id: [type: 'integer', example: Optional.empty()] as PathSanitizer.ParameterSpec]) == '../users/321'
     }
 }

@@ -1,5 +1,6 @@
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.mockserver.socket.PortFactory
 import pl.kasprzak.raml.test.MockServerTestBase
 import spock.lang.Specification
 
@@ -30,7 +31,7 @@ class RamlApiCheckTaskTest extends Specification implements MockServerTestBase {
                         .withPath("/user")
                         .withBody(json('{"name":"John Bean"}'))
         )
-        .respond(
+                .respond(
                 response()
                         .withStatusCode(201)
                         .withHeader("Location", "whatever")
@@ -41,7 +42,7 @@ class RamlApiCheckTaskTest extends Specification implements MockServerTestBase {
                         .withMethod("GET")
                         .withPath("/user/account")
         )
-        .respond(
+                .respond(
                 response()
                         .withStatusCode(200)
                         .withBody('{"id":123}')
@@ -60,6 +61,19 @@ class RamlApiCheckTaskTest extends Specification implements MockServerTestBase {
         createTask().checkApi()
         then:
         thrown AssertionError
+    }
+
+    def "should notify of no server running"() {
+        given:
+            Project project = ProjectBuilder.builder().build()
+            RamlApiCheckTask task = project.task('checkApi', type: RamlApiCheckTask) {
+                ramlPath = '/api.raml'
+                port = PortFactory.findFreePort()
+            }
+        when:
+            task.checkApi()
+        then:
+            thrown AssertionError
     }
 
     private RamlApiCheckTask createTask() {

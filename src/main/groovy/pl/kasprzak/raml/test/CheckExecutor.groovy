@@ -9,14 +9,22 @@ class CheckExecutor {
     def port
 
     def execute(EndpointCheck check) {
+        try {
+            doExecute(check)
+        } catch (ConnectException e) {
+            throw new AssertionError("Could not connect to backend under test, is the server up?", e)
+        }
+    }
+
+    private void doExecute(EndpointCheck check) {
         def response = given().log().all().config().port(port).
                 when()
-                    .body(check.body)
-                    .contentType("application/json")
-                    .withTraits(MethodExecutor).executeMethod(check.method, check.path)
+                .body(check.body)
+                .contentType("application/json")
+                .withTraits(MethodExecutor).executeMethod(check.method, check.path)
                 .then()
-                    .statusCode(check.okStatus)
-                    .extract().response().withTraits(HeaderAssert, ResponseValidator)
+                .statusCode(check.okStatus)
+                .extract().response().withTraits(HeaderAssert, ResponseValidator)
         response.assertHeaders check.responseHeaders
         response.validateResponse check.validateResponse
     }

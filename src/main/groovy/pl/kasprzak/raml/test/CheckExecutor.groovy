@@ -1,20 +1,15 @@
 package pl.kasprzak.raml.test
 
-import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.response.ResponseOptions
 import com.jayway.restassured.specification.RequestSpecification
 
 import static com.jayway.restassured.RestAssured.given
 
 class CheckExecutor {
-    private final int port
-
-    CheckExecutor(port) {
-        this.port = port
-    }
+    def port
 
     def execute(EndpointCheck check) {
-        def response = given().config().port(port).
+        def response = given().log().all().config().port(port).
                 when()
                     .body(check.body)
                     .contentType("application/json")

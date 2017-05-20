@@ -1,38 +1,26 @@
 package pl.kasprzak.raml.test
 
-import org.mockserver.integration.ClientAndServer
-import org.mockserver.model.HttpRequest
-import org.mockserver.model.HttpResponse
-import org.mockserver.socket.PortFactory
 import spock.lang.Specification
 
 import static org.hamcrest.Matchers.hasSize
+import static org.mockserver.model.HttpRequest.request
+import static org.mockserver.model.HttpResponse.response
 import static spock.util.matcher.HamcrestSupport.expect
 
-class CheckExecutorTest extends Specification {
-    def server
-    def static port = PortFactory.findFreePort()
-    private CheckExecutor executor = new CheckExecutor(port)
-
-    def setup() {
-        server = ClientAndServer.startClientAndServer(port)
-    }
-
-    def cleanup() {
-        server.stop()
-    }
+class CheckExecutorTest extends Specification implements MockServerTestBase {
+    private CheckExecutor executor = new CheckExecutor(port: randomPort)
 
     def "should check get request"() {
         given:
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("GET")
                     .withPath("/user")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(200)
                 .withBody("""{"name":"John Bean"}""")
                 .withHeader("Content-Type", "application/json")
@@ -56,12 +44,12 @@ class CheckExecutorTest extends Specification {
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("GET")
                     .withPath("/user")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(200)
                 .withBody("""{"bad":"John Bean"}""")
                 .withHeader("Content-Type", "application/json")
@@ -80,12 +68,12 @@ class CheckExecutorTest extends Specification {
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("GET")
                     .withPath("/user")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(404)
         )
 
@@ -103,13 +91,13 @@ class CheckExecutorTest extends Specification {
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("POST")
                     .withPath("/user")
                     .withBody("""{"name":"John Bean"}""")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(201)
                 .withHeader("Not-A-Location", "/user")
         )
@@ -140,13 +128,13 @@ class CheckExecutorTest extends Specification {
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("POST")
                     .withPath("/user")
                     .withBody("""{"name":"John Bean"}""")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(201)
                 .withHeader("Content-Type", "application/json")
         )
@@ -173,12 +161,12 @@ class CheckExecutorTest extends Specification {
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("PUT")
                     .withPath("/user")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(200)
                 .withHeader("Content-Type", "application/json")
         )
@@ -200,12 +188,12 @@ class CheckExecutorTest extends Specification {
 
         server
             .when(
-                HttpRequest.request()
+                request()
                     .withMethod("DELETE")
                     .withPath("/user")
         )
         .respond(
-            HttpResponse.response()
+            response()
                 .withStatusCode(200)
         )
         def check = new EndpointCheck(

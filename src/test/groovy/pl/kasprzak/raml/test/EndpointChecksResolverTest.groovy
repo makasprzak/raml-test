@@ -49,6 +49,16 @@ class EndpointChecksResolverTest extends Specification {
             expect checks.first().path, endsWith('/users/123')
     }
 
+    def "should replace uri parameters with examples if specified"() {
+        given:
+            String raml = getClass().getResource('/provided_uri_parameter_example.raml').text
+        when:
+            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+        then:
+            checks.size() == 1
+            expect checks.first().path, endsWith('/users/john-bean')
+    }
+
     private Api buildApi(String raml) {
         new RamlModelBuilder().buildApi(raml, location).apiV10
     }

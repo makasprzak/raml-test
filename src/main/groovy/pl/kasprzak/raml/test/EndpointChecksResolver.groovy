@@ -46,7 +46,7 @@ class EndpointChecksResolver {
 
     private String buildPath(Resource resource) {
         def parameterTypes = resource.uriParameters().collectEntries {
-            [(it.name()): it.type()]
+            [(it.name()): it]
         }
         pathSanitizer.sanitizePath(resource.resourcePath(), parameterTypes)
     }

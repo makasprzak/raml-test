@@ -1,3 +1,5 @@
+package pl.kasprzak.raml.test
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.raml.v2.api.RamlModelBuilder

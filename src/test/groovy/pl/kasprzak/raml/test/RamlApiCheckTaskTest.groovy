@@ -1,7 +1,8 @@
+package pl.kasprzak.raml.test
+
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.mockserver.socket.PortFactory
-import pl.kasprzak.raml.test.MockServerTestBase
 import spock.lang.Specification
 
 import static org.mockserver.model.HttpRequest.request

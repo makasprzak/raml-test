@@ -1,5 +1,6 @@
 package pl.kasprzak.raml.test
 
+import com.jayway.restassured.filter.log.LogDetail
 import com.jayway.restassured.response.ResponseOptions
 import com.jayway.restassured.specification.RequestSpecification
 
@@ -17,14 +18,16 @@ class CheckExecutor {
     }
 
     private void doExecute(EndpointCheck check) {
-        def response = given().log().all().config().port(port).
+        def response = given()
+                    .log().ifValidationFails(LogDetail.ALL)
+                    .config().port(port).
                 when()
-                .body(check.body)
-                .contentType("application/json")
-                .withTraits(MethodExecutor).executeMethod(check.method, check.path)
-                .then()
-                .statusCode(check.okStatus)
-                .extract().response().withTraits(HeaderAssert, ResponseValidator)
+                    .body(check.body)
+                    .contentType("application/json")
+                    .withTraits(MethodExecutor).executeMethod(check.method, check.path)
+                .then().log().ifValidationFails(LogDetail.ALL)
+                    .statusCode(check.okStatus)
+                    .extract().response().withTraits(HeaderAssert, ResponseValidator)
         response.assertHeaders check.responseHeaders
         response.validateResponse check.validateResponse
     }

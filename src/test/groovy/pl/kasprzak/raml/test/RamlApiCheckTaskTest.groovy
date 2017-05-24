@@ -66,11 +66,7 @@ class RamlApiCheckTaskTest extends Specification implements MockServerTestBase {
 
     def "should notify of no server running"() {
         given:
-            Project project = ProjectBuilder.builder().build()
-            RamlApiCheckTask task = project.task('checkApi', type: RamlApiCheckTask) {
-                ramlPath = '/api.raml'
-                port = PortFactory.findFreePort()
-            }
+            RamlApiCheckTask task = createRamlTaskFor '/api.raml'
         when:
             task.checkApi()
         then:
@@ -84,5 +80,14 @@ class RamlApiCheckTaskTest extends Specification implements MockServerTestBase {
             port = randomPort
         }
         return task
+    }
+
+    private RamlApiCheckTask createRamlTaskFor(ramlExample) {
+        Project project = ProjectBuilder.builder().build()
+        RamlApiCheckTask task = project.task('checkApi', type: RamlApiCheckTask) {
+            ramlPath = ramlExample
+            port = PortFactory.findFreePort()
+        }
+        task
     }
 }

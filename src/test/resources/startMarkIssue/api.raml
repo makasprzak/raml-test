@@ -1,0 +1,18 @@
+#%RAML 1.0
+title: gigstarter-api
+version: 0.1
+mediaType: application/json
+types:
+  ListElement:
+    type: object
+    properties:
+      id: string
+      name: string
+/bands:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: ListElement[]
+            example: !include example.json

@@ -9,14 +9,13 @@ import static spock.util.matcher.HamcrestSupport.expect
 
 class EndpointChecksResolverTest extends Specification {
     def randomizer = { 123 }
-    def location = 'http://localhost:8080'
-    private final EndpointChecksResolver resolver = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: location, randomizer: randomizer))
+    private final EndpointChecksResolver resolver = new EndpointChecksResolver(pathSanitizer: new PathSanitizer(location: 'http://localhost:8080', randomizer: randomizer))
 
     def "should resolve all endpoint checks"() {
         given:
-            String raml = getClass().getResource('/api.raml').text
+            def api = buildApi('api.raml')
         when:
-            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+            def checks = resolver.resolveEndpointChecksWithApi(api)
         then:
             checks.size() == 3
             def indexed = checks.collectEntries { [[it.method, it.path], (it)] }
@@ -31,9 +30,9 @@ class EndpointChecksResolverTest extends Specification {
 
     def "should replace template uri parameter of unspecified type with dummy string value by default"() {
         given:
-            String raml = getClass().getResource('/default_uri_parameter_example.raml').text
+            def api = buildApi('default_uri_parameter_example.raml')
         when:
-            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+            def checks = resolver.resolveEndpointChecksWithApi(api)
         then:
             checks.size() == 1
             expect checks.first().path, endsWith('/users/some-id')
@@ -41,9 +40,9 @@ class EndpointChecksResolverTest extends Specification {
 
     def "should replace integer uri parameters with random value by default"() {
         given:
-            String raml = getClass().getResource('/integer_uri_parameter_example.raml').text
+            def api = buildApi('integer_uri_parameter_example.raml')
         when:
-            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+            def checks = resolver.resolveEndpointChecksWithApi(api)
         then:
             checks.size() == 1
             expect checks.first().path, endsWith('/users/123')
@@ -51,16 +50,35 @@ class EndpointChecksResolverTest extends Specification {
 
     def "should replace uri parameters with examples if specified"() {
         given:
-            String raml = getClass().getResource('/provided_uri_parameter_example.raml').text
+            def api = buildApi('provided_uri_parameter_example.raml')
         when:
-            def checks = resolver.resolveEndpointChecksWithApi(buildApi(raml))
+            def checks = resolver.resolveEndpointChecksWithApi(api)
         then:
             checks.size() == 1
             expect checks.first().path, endsWith('/users/john-bean')
     }
 
-    private Api buildApi(String raml) {
-        new RamlModelBuilder().buildApi(raml, location).apiV10
+    def "startMark on null object issue"() {
+        given:
+            Api api = buildApi('startMarkIssue/api.raml')
+        when:
+            resolver.resolveEndpointChecksWithApi(api)
+        then:
+            noExceptionThrown()
+    }
+
+    private Api buildApi(String path) {
+        def raml = readFile path
+        def api = new RamlModelBuilder().buildApi(raml, path)
+        api.apiV10
+    }
+
+    def readFile(String path) {
+        getClass().getClassLoader().getResource(path).text
+    }
+
+    private Api buildApi(String raml, String path) {
+        new RamlModelBuilder().buildApi(raml, path).apiV10
     }
 
 }

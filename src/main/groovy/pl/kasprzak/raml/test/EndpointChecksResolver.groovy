@@ -66,9 +66,10 @@ class EndpointChecksResolver {
 
     private static String extractOriginalValue_dirtyHack(ExampleSpec it) {
         def node = it.node.yamlNode
+        if (node == null) return it.value()
         def startMark = node.startMark
         def endMark = node.endMark
-        endMark.buffer.substring(startMark.index, endMark.index)
+        return endMark.buffer.substring(startMark.index, endMark.index)
     }
 
 }

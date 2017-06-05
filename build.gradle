@@ -9,7 +9,7 @@ logging.captureStandardOutput LogLevel.DEBUG
 //cobertura.coverageSourceDirs = sourceSets.main.groovy.srcDirs
 
 group 'pl.makasprzak'
-version '1.0-SNAPSHOT'
+version '0.1-alpha-SNAPSHOT'
 
 
 apply plugin: 'groovy'

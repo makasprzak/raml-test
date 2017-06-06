@@ -1,7 +1,6 @@
 language: groovy
 jdk:
   - oraclejdk8
-script:
-  - ./gradlew check
+install: true
 after_success:
   - ./gradlew jacocoTestReport coveralls

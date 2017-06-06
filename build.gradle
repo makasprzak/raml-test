@@ -9,12 +9,15 @@ logging.captureStandardOutput LogLevel.DEBUG
 //cobertura.coverageSourceDirs = sourceSets.main.groovy.srcDirs
 
 group 'pl.makasprzak'
+archivesBaseName = "raml-test"
 version '0.1-alpha-SNAPSHOT'
 
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: "jacoco"
+apply plugin: 'signing'
+
 
 jacocoTestReport {
     reports {
@@ -46,3 +49,65 @@ dependencies {
     testCompile group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.7'
 }
 
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'RAML Test'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Gradle Task that verifies RESTful API contract against RAML file'
+                url 'https://github.com/makasprzak/raml-test'
+
+                scm {
+                    connection 'https://github.com/makasprzak/raml-test.git'
+                    developerConnection 'https://github.com/makasprzak/raml-test.git'
+                    url 'http://foo.googlecode.com/svn/trunk/'
+                }
+
+                licenses {
+                    license {
+                        name 'GNU General Public License v3.0'
+                        url 'http://www.gnu.org/licenses/gpl-3.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'makasprzak'
+                        name 'Maciej Kasprzak'
+                        email 'ceo@makasprzak.pl'
+                    }
+                }
+            }
+        }
+    }
+}

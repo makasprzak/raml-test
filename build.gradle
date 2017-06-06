@@ -58,7 +58,7 @@ task javadocJar(type: Jar) {
 }
 
 artifacts {
-    archives sourcesJar
+    archives sourcesJar, javadocJar
 }
 
 signing {

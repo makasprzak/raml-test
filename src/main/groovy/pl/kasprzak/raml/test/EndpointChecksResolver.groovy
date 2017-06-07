@@ -38,10 +38,15 @@ class EndpointChecksResolver {
                 path: buildPath(resource),
                 okStatus: response.code().value().toInteger(),
                 validateResponse: responseBodyValidationClosure(response),
-                responseHeaders: response.headers()*.name().collect()
+                responseHeaders: response.headers()*.name().collect(),
+                optionalParams: optionalParams(method)
         )
         extractBody(method).ifPresent{check.body = it}
         return check
+    }
+
+    private Map<String, String> optionalParams(Method method) {
+        method.queryParameters().collect {it.name()}.collectEntries {[(it):"some-$it"]}
     }
 
     private String buildPath(Resource resource) {

@@ -58,6 +58,16 @@ class EndpointChecksResolverTest extends Specification {
             expect checks.first().path, endsWith('/users/john-bean')
     }
 
+    def "should include optional query parameters in a check"() {
+        given:
+        def api = buildApi('default_query_parameter_example.raml')
+        when:
+        def checks = resolver.resolveEndpointChecksWithApi(api)
+        then:
+        checks.size() == 1
+        expect checks.first().optionalParams.keySet(), containsInAnyOrder('firstName', 'lastName')
+    }
+
     def "startMark on null object issue"() {
         given:
             Api api = buildApi('startMarkIssue/api.raml')

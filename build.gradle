@@ -6,10 +6,8 @@ plugins {
 
 logging.captureStandardOutput LogLevel.DEBUG
 
-//cobertura.coverageSourceDirs = sourceSets.main.groovy.srcDirs
-
 group = 'pl.makasprzak'
-version = '0.1-alpha'
+version = '0.2-alpha-SNAPSHOT'
 
 apply plugin: 'groovy'
 apply plugin: 'maven'

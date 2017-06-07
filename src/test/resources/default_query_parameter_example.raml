@@ -1,0 +1,14 @@
+#%RAML 1.0
+title: test-api
+/users/search:
+  get:
+    queryParameters:
+      firstName:
+        type: string
+      lastName:
+        type: string
+    responses:
+      200:
+        body:
+          application/json:
+            example: { "name": "John Bean" }
